@@ -51,6 +51,75 @@ const observe = (fn) => {
   }
 };
 
-const p = observable({ num: 0 });
-const j = observe(() => console.log("this is observe", p.num));
+class computedIpl {
+  #_value;
+  #_setter;
+  #effect;
+
+  constructor(options) {
+    this.#_value = undefined;
+    this.#_setter = undefined;
+    const { get, set } = options;
+    this.#_setter = set;
+    this.#effect = observe(() => {
+      this.#_value = get();
+    });
+  }
+
+  get value() {
+    return this.#_value;
+  }
+  set value(val) {
+    this.#_setter && this.#_setter(val);
+  }
+}
+const computed = (fnOrOptions) => {
+  const options = {
+    get: null,
+    set: null,
+  };
+
+  if (fnOrOptions instanceof Function) {
+    options.get = fnOrOptions;
+  } else {
+    const { get, set } = fnOrOptions;
+    options.get = get;
+    options.set = set;
+  }
+  return new computedIpl(options);
+};
+
+let p = observable({ num: 0 });
+let j = observe(() => {
+  console.log("i am observe:", p.num);
+  return `i am observe: ${p.num}`;
+});
+let e = observe(() => {
+  console.log("i am observe2:", p.num);
+});
+let w = computed(() => {
+  return "我是computed 1:" + p.num;
+});
+let v = computed({
+  get: () => {
+    return "test computed getter" + p.num;
+  },
+
+  set: (val) => {
+    p.num = `test computed setter${val}`;
+  },
+});
+
 p.num++;
+
+
+console.log(w.value);
+v.value = 3000;
+console.log(w.value);
+// i am observe: test computed setter3000
+// i am observe2: test computed setter3000
+// 我是computed 1:test computed setter3000
+w.value = 1000;
+// 并没有为w设置setter所以并没有生效
+// 我是computed 1:test computed setter3000
+console.log(w.value);
