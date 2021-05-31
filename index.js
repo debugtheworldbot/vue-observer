@@ -111,15 +111,6 @@ let v = computed({
 });
 
 p.num++;
-
-
 console.log(w.value);
 v.value = 3000;
-console.log(w.value);
-// i am observe: test computed setter3000
-// i am observe2: test computed setter3000
-// 我是computed 1:test computed setter3000
-w.value = 1000;
-// 并没有为w设置setter所以并没有生效
-// 我是computed 1:test computed setter3000
 console.log(w.value);
